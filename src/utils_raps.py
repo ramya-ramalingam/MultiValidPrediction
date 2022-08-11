@@ -88,6 +88,7 @@ def validate_with_sets(val_loader, model, groups, print_bool):
         size = AverageMeter('RAPS size')
         size_list = list()
         size_groups = np.zeros(len(groups))
+        print(coverage_groups, size_groups)
         # switch to evaluate mode
         model.eval()
         end = time.time()
@@ -105,6 +106,7 @@ def validate_with_sets(val_loader, model, groups, print_bool):
             to_append_cvg_groups, to_append_sz_groups = to_append_coverage_size_with_groups(S, target, groups)
             coverage_groups += to_append_cvg_groups
             size_groups += to_append_sz_groups
+            print(coverage_groups, size_groups)
 
             # Update meters
             top1.update(prec1.item()/100.0, n=x.shape[0])
@@ -144,11 +146,11 @@ def to_append_coverage_size_with_groups(S, targets, groups):
     to_append_sz_groups = np.zeros(len(groups))
     for i in range(targets.shape[0]):
         curr_x = (None, targets[i].item())
-        print(curr_x)
         for k, group in enumerate(groups):
             if group(curr_x):
                 to_append_cvg_groups[k] += (targets[i].item() in S[i])
                 to_append_sz_groups[k] += 1
+    print(to_append_cvg_groups, to_append_sz_groups)
     return to_append_cvg_groups, to_append_sz_groups
 
 def coverage_size(S,targets):
