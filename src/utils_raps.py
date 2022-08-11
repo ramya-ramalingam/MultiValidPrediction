@@ -84,8 +84,10 @@ def validate_with_sets(val_loader, model, print_bool):
         top5 = AverageMeter('top5')
         coverage = AverageMeter('RAPS coverage')
         covered_list = list()
+        coverage_groups = list()
         size = AverageMeter('RAPS size')
         size_list = list()
+        size_groups = list()
         # switch to evaluate mode
         model.eval()
         end = time.time()
@@ -100,6 +102,9 @@ def validate_with_sets(val_loader, model, print_bool):
             to_append_cvg, to_append_sz = to_append_coverage_size(S, target)
             covered_list += to_append_cvg
             size_list += to_append_sz
+            to_append_cvg_groups, to_append_sz_groups = to_append_coverage_size_with_groups(S, target, groups)
+            coverage_groups += to_append_cvg_groups
+            size_groups += to_append_sz_groups
 
             # Update meters
             top1.update(prec1.item()/100.0, n=x.shape[0])
@@ -124,7 +129,7 @@ def validate_with_sets(val_loader, model, print_bool):
     if print_bool:
         print('') #Endline
 
-    return top1.avg, top5.avg, coverage.avg, size.avg, covered_list, size_list
+    return top1.avg, top5.avg, coverage.avg, size.avg, covered_list, size_list, coverage_groups, size_groups
 
 def to_append_coverage_size(S, targets):
     to_append_cvg = list()
@@ -133,6 +138,18 @@ def to_append_coverage_size(S, targets):
         to_append_cvg.append(targets[i].item() in S[i])
         to_append_sz.append(S[i].shape[0])
     return to_append_cvg, to_append_sz
+
+def to_append_coverage_size_with_groups(S, targets, groups):
+    to_append_cvg_groups = np.zeros(len(groups))
+    to_append_sz_groups = np.zeros(len(groups))
+    for i in range(targets.shape[0]):
+        curr_x = (None, targets[i].item())
+        print(curr_x)
+        for k, group in enumerate(groups):
+            if group(curr_x):
+                to_append_cvg_groups[k] += (targets[i].item() in S[i])
+                to_append_sz_groups[k] += 1
+    return to_append_cvg_groups, to_append_sz_groups
 
 def coverage_size(S,targets):
     covered = 0
