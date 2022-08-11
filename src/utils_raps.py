@@ -77,17 +77,17 @@ def validate(val_loader, model, print_bool):
 
     return top1.avg, top5.avg, coverage.avg, size.avg
 
-def validate_with_sets(val_loader, model, print_bool):
+def validate_with_sets(val_loader, model, groups, print_bool):
     with torch.no_grad():
         batch_time = AverageMeter('batch_time')
         top1 = AverageMeter('top1')
         top5 = AverageMeter('top5')
         coverage = AverageMeter('RAPS coverage')
         covered_list = list()
-        coverage_groups = list()
+        coverage_groups = np.zeros(len(groups))
         size = AverageMeter('RAPS size')
         size_list = list()
-        size_groups = list()
+        size_groups = np.zeros(len(groups))
         # switch to evaluate mode
         model.eval()
         end = time.time()
